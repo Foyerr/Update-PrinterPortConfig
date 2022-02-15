@@ -1,4 +1,5 @@
 Function BackUp-Registry(){
+    Write-Host -ForegroundColor Green "Backing up the registry to $(Get-location)"
     Reg export "HKLM\SYSTEM\CurrentControlSet\Control\Print\Printers" .\PrinterListBak.reg
     Reg export "HKLM\SYSTEM\CurrentControlSet\Control\Print\Monitors\Standard TCP/IP Port\ports" .\MonitorPortBak.reg
 }
@@ -29,6 +30,8 @@ Function Get-PrinterIP{
 }
 
 Function Set-PrinterIP($printerList){
+    BackUp-Registry
+
     $ans='y'
     foreach($i in $printerList){
         if($i.DisplayedPort -ne $i."Real IP" -AND $i."Real IP" -ne ""){
@@ -56,7 +59,7 @@ Function Set-PrinterIP($printerList){
     }
 }
 
-BackUp-Registry
+
 
 $printerList = Get-PrinterIP
 
