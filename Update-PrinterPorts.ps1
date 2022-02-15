@@ -1,3 +1,8 @@
+Function BackUp-Registry(){
+    Reg export "HKLM\SYSTEM\CurrentControlSet\Control\Print\Printers" .\PrinterListBak.reg
+    Reg export "HKLM\SYSTEM\CurrentControlSet\Control\Print\Monitors\Standard TCP/IP Port\ports" .\MonitorPortBak.reg
+}
+
 Function Get-PrinterIP{
 
     $list=@()
@@ -15,7 +20,7 @@ Function Get-PrinterIP{
         }catch{
             $RealIP=""
             $OldPortName=""
-            write-host("Error")
+            write-host("Error on $($i.Name)")
         }
 
         $list += $(""|select-object @{n="PrinterName";e={$i.Name}},@{n="Location";e={$i.Location}},@{n="Real IP";e={$RealIP}},@{n="DisplayedPort";e={($OldPortName)}})
@@ -36,6 +41,8 @@ Function Set-PrinterIP($printerList){
         }
     }
 }
+
+BackUp-Registry
 
 $printerList = Get-PrinterIP
 #Set-PrinterIP $printerList
