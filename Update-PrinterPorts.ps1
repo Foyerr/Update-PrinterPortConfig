@@ -29,9 +29,23 @@ Function Get-PrinterIP{
 }
 
 Function Set-PrinterIP($printerList){
+    $ans='y'
     foreach($i in $printerList){
         if($i.DisplayedPort -ne $i."Real IP" -AND $i."Real IP" -ne ""){
-            write-host("Changing $($i.PrinterName,$i.DisplayedPort) to $($i."Real IP")")
+
+            #Confirm one at a time or all
+            if($ans.ToLower() -eq 'y'){
+                Write-Host "Change $($i.PrinterName,$i.DisplayedPort) to $($i."Real IP")"
+                $ans=Read-host "[Y] Yes  [A] Yes to All  [H] Halt Command (Default: H)"
+                
+                #If not entered, set to y
+                if ([string]::IsNullOrWhiteSpace($ans)){
+                    $ans='h'
+                }
+            }
+            #if not y or a break the loop
+            if($ans.ToLower() -notin @("y","a")){break}
+
             
             #Change Current Port Name to new IP
             Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Print\Printers\$($i.PrinterName)" -Name port -value $i."Real IP"
@@ -45,9 +59,9 @@ Function Set-PrinterIP($printerList){
 BackUp-Registry
 
 $printerList = Get-PrinterIP
-#Set-PrinterIP $printerList
 
-#Restart-Service -Force Spooler
+Set-PrinterIP $printerList
+
+Restart-Service -Force Spooler -confirm
 
 
-#$printerList | sort "Real IP" | Export-CSV C:\temp\PrinterListCorrectIP.csv
