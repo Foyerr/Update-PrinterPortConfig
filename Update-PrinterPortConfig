@@ -1,8 +1,35 @@
+<#
+.SYNOPSIS
+    Backs up specific registry keys related to printers and port monitors to the current directory.
+
+.EXAMPLE
+    BackUp-Registry
+    This example backs up the registry keys for printers and port monitors to the current directory.
+
+.NOTES
+    The function exports registry keys using the 'Reg export' command.
+    The exported files are named 'PrinterListBak.reg' and 'MonitorPortBak.reg'.
+#>
+
 Function BackUp-Registry(){
     Write-Host -ForegroundColor Green "Backing up the registry to $(Get-location)"
     Reg export "HKLM\SYSTEM\CurrentControlSet\Control\Print\Printers" .\PrinterListBak.reg
     Reg export "HKLM\SYSTEM\CurrentControlSet\Control\Print\Monitors\Standard TCP/IP Port\ports" .\MonitorPortBak.reg
 }
+
+<#
+.SYNOPSIS
+    Retrieves the IP addresses associated with printers and returns them in a custom object list.
+
+.EXAMPLE
+    $printerList = Get-PrinterIP
+    This example retrieves the IP addresses and other details of printers and stores them in the $printerList variable.
+
+.NOTES
+    The function queries the registry to fetch the IP addresses.
+    It returns a list of custom objects with properties: PrinterName, Location, Real IP, and DisplayedPort.
+    Errors are caught and logged to the console.
+#>
 
 Function Get-PrinterIP{
 
@@ -28,6 +55,26 @@ Function Get-PrinterIP{
     }
     return($list)
 }
+
+
+<#
+.SYNOPSIS
+    Updates the IP addresses of printers based on a provided list of printer details.
+
+.PARAMETER printerList
+    Specifies the list of printers with details to be updated.
+    [Default: None]
+
+.EXAMPLE
+    Set-PrinterIP $printerList
+    This example updates the IP addresses of printers based on the details in the $printerList variable.
+
+.NOTES
+    The function first calls BackUp-Registry to back up the relevant registry keys.
+    It then iteratively updates the registry keys for each printer in the list.
+    User confirmation is required for each update.
+    The function restarts the Spooler service after completing the updates.
+#>
 
 Function Set-PrinterIP($printerList){
     BackUp-Registry
